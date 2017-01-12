@@ -141,6 +141,9 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         String message = parseAndFindFirstMatch( body, regex );
 
+        // if message parsed from html body then it may be terminated with </html>
+        message = message.replace( '</html>', '' );
+
         System.debug( 'message: ' + message );
 
         return message;
