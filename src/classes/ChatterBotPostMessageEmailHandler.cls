@@ -26,7 +26,7 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         } catch ( Exception e ) {
 
-            System.debug( LoggingLevel.ERROR, e.getStackTraceString() );
+            System.debug( LoggingLevel.ERROR, e.getMessage() + ' : ' + e.getStackTraceString() );
 
             result.message = e.getMessage() + '\n' + e.getStackTraceString();
             result.success = false;
@@ -35,7 +35,7 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         if ( result.success == false ) {
             if ( sp != null ) {
-                System.debug( 'Rolling back transaction' );
+                System.debug( LoggingLevel.ERROR, 'Rolling back transaction' );
                 Database.rollback( sp );
             }
         }
@@ -49,27 +49,84 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         System.debug( 'processing email' );
 
-        String subjectId = parseSubjectId( email );
-        String message = parseMessage( email );
+        ChatterBotPostMessageInvocable.Request req = (ChatterBotPostMessageInvocable.Request) JSON.deserialize( email.plainTextBody, ChatterBotPostMessageInvocable.Request.class );
+
+        System.debug( req );
+
+        String authorId = req.authorId;     // who is posting the message
+        String subjectId = req.subjectId;   // where the post is being made: user, group, record
+        String recordId = req.recordId;     // if using email template, the record used to satisfy merge fields
+        String message = req.message;       // if not using email template, the chatter message to post
+        String emailTemplateName = req.emailTemplateName;
+        String networkId = getNetworkIdForSubject( subjectId );
+
+        if ( String.isBlank( authorId ) ) {
+            throw new ChatterBotPostMessageException( 'Missing "authorId" to indicate which user is authoring this Chatter post.' );
+        }
 
         if ( String.isBlank( subjectId ) ) {
-            throw new ChatterBotPostMessageException( 'Missing "subjectId=<user, group, or record id>" in email body.' );
+            throw new ChatterBotPostMessageException( 'Missing "subjectId" to indicate where to post this message: User, Group, or Record ID.' );
+        }
+
+        if ( String.isNotBlank( emailTemplateName ) ) {
+
+            List<EmailTemplate> templates = new List<EmailTemplate>([ SELECT id, body FROM EmailTemplate WHERE developerName = :emailTemplateName LIMIT 1 ]);
+
+            if ( templates.size() == 0 ) {
+                throw new ChatterBotPostMessageException( 'No email template found by unique name: ' + emailTemplateName );
+            }
+
+            Messaging.SingleEmailMessage emailMessage = Messaging.renderStoredEmailTemplate( templates[0].id, authorId, recordId );
+
+            message = emailMessage.getHtmlBody();
+
         }
 
         if ( String.isBlank( message ) ) {
-            throw new ChatterBotPostMessageException( 'Missing "message=<text>" in email body.' );
+            throw new ChatterBotPostMessageException( 'One of either "message" or "emailTemplateName" must be provided as the content of the Chatter post.' );
         }
 
-        String networkId = getNetworkIdForSubject( subjectId );
+        postChatterMessage( networkId, authorId, subjectId, message );
 
-        System.debug( 'posting feed item: networkId=' + networkId + ', subjectId=' + subjectId + ', message=' + message );
+    }
 
-        // I am eternally grateful for the ConnectApiHelper
-        // one line and rich text chatter message with @mentions created, yeah!
-        // https://github.com/forcedotcom/ConnectApiHelper
-        ConnectApi.FeedItem fi = (ConnectApi.FeedItem) ConnectApiHelper.postFeedItemWithMentions( networkId, subjectId, message );
+    private void postChatterMessage( ID networkId, ID authorId, ID subjectId, String message ) {
+
+        System.debug( 'posting chatter message: networkId=' + networkId + ', authorId=' + authorId + ', subjectId=' + subjectId + ', message=' + message );
+
+        // we use a mix of FeedItem DML and ConnectApi for our requirements:
+        // 1. Post Chatter Message as any user (FeedItem DML)
+        // 2. Post Rich-Text content with @mentions (ConnectApi)
+
+        // setting the createdById only works if the context user of this email service
+        // has the system permission "Insert System Field Values for Chatter Feeds"
+
+        FeedItem fi = new FeedItem(
+            parentId = subjectId,       // where post is being made: user, group, record
+            createdById = authorId,     // who is posting the message
+            body = '[Chatter Bot]',     // default message, cannot be blank
+            isRichText = true           // we support rich-text and @mentions
+        );
+
+        insert fi;
 
         System.debug( fi );
+
+        // after creating the shell of the feed item, retrieve the record back in Chatter for Apex
+        ConnectApi.FeedElement fe = ConnectApi.ChatterFeeds.getFeedElement( networkId, fi.id );
+
+        // parse the rich-text message and create new message input
+        ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
+        messageInput.messageSegments = ConnectApiHelper.getMessageSegmentInputs( message );
+
+        // define an updated feed element using the rich-text message
+        ConnectApi.FeedItemInput input = new ConnectApi.FeedItemInput();
+        input.body = messageInput;
+
+        // replace the content of the chatter post
+        fe = ConnectApi.ChatterFeeds.updateFeedElement( networkId, fe.id, input );
+
+        System.debug( fe );
 
     }
 
@@ -116,53 +173,6 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
         System.debug( 'networkId: ' + networkId );
 
         return networkId;
-    }
-
-    private String parseSubjectId( Messaging.InboundEmail email ) {
-
-        String regex = 'subjectId=(.*)';
-        String body = ( String.isBlank( email.htmlBody ) ? email.plainTextBody : email.htmlBody );
-
-        System.debug( 'Checking email body for subject id: regex=' + regex + ', body=' + body );
-
-        String subjectId = parseAndFindFirstMatch( body, regex );
-
-        System.debug( 'subject id: ' + subjectId );
-
-        return subjectId;
-    }
-
-    private String parseMessage( Messaging.InboundEmail email ) {
-
-        String regex = 'message=((.*\\s*)+)';
-        String body = ( String.isBlank( email.htmlBody ) ? email.plainTextBody : email.htmlBody );
-
-        System.debug( 'Checking email body for message: regex=' + regex + ', body=' + body );
-
-        String message = parseAndFindFirstMatch( body, regex );
-
-        // if message parsed from html body then it may be terminated with </html>
-        message = message.replace( '</html>', '' );
-
-        System.debug( 'message: ' + message );
-
-        return message;
-    }
-
-    /**
-     * Parses a string using regular expression and returns first grouping match.
-     */
-    private String parseAndFindFirstMatch( String text, String regex ) {
-
-        String value = '';
-        Pattern myPattern = Pattern.compile( regex );
-        Matcher myMatcher = myPattern.matcher( text );
-
-        if ( myMatcher.find() ) {
-            value = myMatcher.group(1).trim();
-        }
-
-        return value;
     }
 
     public class ChatterBotPostMessageException extends Exception {}
