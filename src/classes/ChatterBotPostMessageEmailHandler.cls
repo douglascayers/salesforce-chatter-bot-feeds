@@ -101,10 +101,15 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
         // setting the createdById only works if the context user of this email service
         // has the system permission "Insert System Field Values for Chatter Feeds"
 
+        // even though rich-text is supported with FeedItem DML,
+        // all @mention links are converted to plain text.
+        // workaround is that after inserting the FeedItem we use ConnectApi
+        // to update the element with the same rich-text but @mentions will be preserved.
+
         FeedItem fi = new FeedItem(
             parentId = subjectId,       // where post is being made: user, group, record
             createdById = authorId,     // who is posting the message
-            body = '[Chatter Bot]',     // default message, cannot be blank
+            body = message,             // rich-text, but @mentions not supported
             isRichText = true           // we support rich-text and @mentions
         );
 
