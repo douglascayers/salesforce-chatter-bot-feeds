@@ -3,7 +3,7 @@
  * https://github.com/DouglasCAyers/salesforce-chatter-bot-feeds
  */
 @isTest
-private class ChatterBotPostMessageEmailBatchableTest {
+private class ChatterBotPostMessageInvocableTest {
 
     @isTest
     static void test_success() {
@@ -19,7 +19,7 @@ private class ChatterBotPostMessageEmailBatchableTest {
         req.subjectId = UserInfo.getUserId();
         req.message = 'Hello World';
 
-        Database.executeBatch( new ChatterBotPostMessageEmailBatchable( new List<ChatterBotPostMessageInvocable.Request>{ req } ) );
+        ChatterBotPostMessageInvocable.execute( new List<ChatterBotPostMessageInvocable.Request>{ req } );
 
         Test.stopTest();
 
@@ -37,7 +37,7 @@ private class ChatterBotPostMessageEmailBatchableTest {
             req.subjectId = UserInfo.getUserId();
             req.message = 'Hello World';
 
-            Database.executeBatch( new ChatterBotPostMessageEmailBatchable( new List<ChatterBotPostMessageInvocable.Request>{ req } ) );
+            ChatterBotPostMessageInvocable.execute( new List<ChatterBotPostMessageInvocable.Request>{ req } );
 
             Test.stopTest();
 

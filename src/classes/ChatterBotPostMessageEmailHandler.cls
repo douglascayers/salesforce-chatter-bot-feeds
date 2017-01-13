@@ -1,6 +1,6 @@
 /**
- * Developed by Doug Ayers
- * douglascayers.com
+ * Developed by Doug Ayers (douglascayers.com)
+ * https://github.com/DouglasCAyers/salesforce-chatter-bot-feeds
  *
  * https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_ConnectAPI_ChatterFeeds_static_methods.htm#apex_ConnectAPI_ChatterFeeds_postFeedElement_3
  * https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/connectapi_examples_post_feed_element_mention.htm
@@ -58,7 +58,6 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
         String recordId = req.recordId;     // if using email template, the record used to satisfy merge fields
         String message = req.message;       // if not using email template, the chatter message to post
         String emailTemplateName = req.emailTemplateName;
-        String networkId = getNetworkIdForSubject( subjectId );
 
         if ( String.isBlank( authorId ) ) {
             throw new ChatterBotPostMessageException( 'Missing "authorId" to indicate which user is authoring this Chatter post.' );
@@ -85,6 +84,8 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
         if ( String.isBlank( message ) ) {
             throw new ChatterBotPostMessageException( 'One of either "message" or "emailTemplateName" must be provided as the content of the Chatter post.' );
         }
+
+        String networkId = getNetworkIdForSubject( subjectId );
 
         postChatterMessage( networkId, authorId, subjectId, message );
 

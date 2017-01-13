@@ -1,6 +1,6 @@
 /**
- * Developed by Doug Ayers
- * douglascayers.com
+ * Developed by Doug Ayers (douglascayers.com)
+ * https://github.com/DouglasCAyers/salesforce-chatter-bot-feeds
  */
 public with sharing class ChatterBotPostMessageInvocable {
 

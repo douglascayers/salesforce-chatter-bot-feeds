@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Example template for posting Chatter messages as specific user.</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Chatter Bot Post Message Template</name>
+    <style>none</style>
+    <subject>Chatter Bot Post Message Template Subject Is Ignored</subject>
+    <textOnly>&lt;p&gt;
+    Congratulations, you&apos;ve just received a Chatter post by Chatter Bot!
+    &lt;p&gt;&amp;nbsp;&lt;/p&gt;
+    Here are some things to know:
+&lt;/p&gt;
+
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+
+&lt;p&gt;
+    &lt;b&gt;@ mentions&lt;/b&gt;
+    &lt;ol&gt;
+        &lt;li&gt;
+            Chatter messages support @ mentions by placing a Chatter User, Group, or Record ID between two curly brackets like this {userId}.
+        &lt;/li&gt;
+        &lt;li&gt;
+            When working with merge fields in an Email Template, the Object and Field names are enclosed between &apos;{!&apos; and &apos;}&apos; so you would still need to add one more set of { and } around that.
+        &lt;/li&gt;
+        &lt;li&gt;
+            Here&apos;s an example where we are @ mentioning your name {{!Chatter_Bot_Group_Member__c.MemberId__c}}
+        &lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+
+&lt;p&gt;
+    &lt;b&gt;Rich Text Formatting&lt;/b&gt;
+    &lt;ul&gt;
+        &lt;li&gt;
+            Chatter messages also support a subset of HTML tags to make rich text posts.
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;p&amp;gt; starts a new paragraph &amp;lt;/p&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;b&amp;gt; &lt;b&gt;bold&lt;/b&gt; &amp;lt;/b&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;i&amp;gt; &lt;i&gt;italic&lt;/i&gt; &amp;lt;/i&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;s&amp;gt; &lt;s&gt;strikethrough&lt;/s&gt; &amp;lt;/s&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;u&amp;gt; &lt;u&gt;underline&lt;/u&gt; &amp;lt;/u&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;ul&amp;gt; bulleted list &amp;lt;/ul&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;ol&amp;gt; numbered list &amp;lt;/ol&amp;gt;
+        &lt;/li&gt;
+        &lt;li&gt;
+            &amp;lt;li&amp;gt; list item within a bulleted or numbered list &amp;lt;/li&amp;gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/p&gt;
+
+&lt;p&gt;&amp;nbsp;&lt;/p&gt;
+
+&lt;p&gt;
+    &lt;b&gt;Blank Lines&lt;/b&gt;
+    &lt;p&gt;
+        Since Chatter does not support the &amp;lt;br&amp;gt; break tag then you can use &amp;lt;p&amp;gt;&amp;amp;nbsp;&amp;lt;/p&amp;gt; to create a blank paragraph with same effect.
+    &lt;/p&gt;
+&lt;/p&gt;</textOnly>
+    <type>custom</type>
+</EmailTemplate>

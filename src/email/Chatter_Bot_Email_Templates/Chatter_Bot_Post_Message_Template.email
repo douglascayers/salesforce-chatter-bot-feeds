@@ -1,0 +1,66 @@
+<p>
+    Congratulations, you've just received a Chatter post by Chatter Bot for joining group {{!Chatter_Bot_Group_Member__c.Chatter_Group_ID__c}}
+    <p>&nbsp;</p>
+    Here are some things to know:
+</p>
+
+<p>&nbsp;</p>
+
+<p>
+    <b>@ mentions</b>
+    <ol>
+        <li>
+            Chatter messages support @ mentions by placing a Chatter User, Group, or Record ID between two curly brackets like this {userId}.
+        </li>
+        <li>
+            When working with merge fields in an Email Template, the Object and Field names are enclosed between '&#123;!' and '&#125;' so you would still need to add one more set of { and } around that.
+        </li>
+        <li>
+            Here's an example where we are @ mentioning your name {{!Chatter_Bot_Group_Member__c.MemberId__c}}
+        </li>
+    </ol>
+</p>
+
+<p>&nbsp;</p>
+
+<p>
+    <b>Rich Text Formatting</b>
+    <ul>
+        <li>
+            Chatter messages also support a subset of HTML tags to make rich text posts.
+        </li>
+        <li>
+            &lt;p&gt; starts a new paragraph &lt;/p&gt;
+        </li>
+        <li>
+            &lt;b&gt; <b>bold</b> &lt;/b&gt;
+        </li>
+        <li>
+            &lt;i&gt; <i>italic</i> &lt;/i&gt;
+        </li>
+        <li>
+            &lt;s&gt; <s>strikethrough</s> &lt;/s&gt;
+        </li>
+        <li>
+            &lt;u&gt; <u>underline</u> &lt;/u&gt;
+        </li>
+        <li>
+            &lt;ul&gt; bulleted list &lt;/ul&gt;
+        </li>
+        <li>
+            &lt;ol&gt; numbered list &lt;/ol&gt;
+        </li>
+        <li>
+            &lt;li&gt; list item within a bulleted or numbered list &lt;/li&gt;
+        </li>
+    </ul>
+</p>
+
+<p>&nbsp;</p>
+
+<p>
+    <b>Blank Lines</b>
+    <p>
+        Since Chatter does not support the &lt;br&gt; break tag then you can use &lt;p&gt;&amp;nbsp;&lt;/p&gt; to create a blank paragraph with same effect.
+    </p>
+</p>
