@@ -49,15 +49,42 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         System.debug( 'processing email' );
 
-        ChatterBotPostMessageInvocable.Request req = (ChatterBotPostMessageInvocable.Request) JSON.deserialize( email.plainTextBody, ChatterBotPostMessageInvocable.Request.class );
+        List<ChatterBotPostMessageInvocable.Request> requests = (List<ChatterBotPostMessageInvocable.Request>) JSON.deserialize( email.plainTextBody, List<ChatterBotPostMessageInvocable.Request>.class );
 
-        System.debug( req );
+        Set<String> emailTemplateNames = new Set<String>();
+        Set<ID> subjectIds = new Set<ID>();
 
-        String authorId = req.authorId;     // who is posting the message
-        String subjectId = req.subjectId;   // where the post is being made: user, group, record
-        String recordId = req.recordId;     // if using email template, the record used to satisfy merge fields
-        String message = req.message;       // if not using email template, the chatter message to post
-        String emailTemplateName = req.emailTemplateName;
+        for ( ChatterBotPostMessageInvocable.Request request : requests ) {
+
+            if ( String.isNotBlank( request.emailTemplateName ) ) {
+                emailTemplateNames.add( request.emailTemplateName );
+            }
+
+            if ( String.isNotBlank( request.subjectId ) ) {
+                subjectIds.add( request.subjectId );
+            }
+
+        }
+
+        Map<String, ID> emailTemplateNameToIdMap = queryEmailTemplateNameToIdMap( emailTemplateNames );
+        Map<ID, ID> subjectIdToNetworkIdMap = querySubjectIdToNetworkIdMap( subjectIds );
+
+        for ( ChatterBotPostMessageInvocable.Request request : requests ) {
+            processRequest( request, emailTemplateNameToIdMap, subjectIdToNetworkIdMap );
+        }
+
+    }
+
+    private void processRequest( ChatterBotPostMessageInvocable.Request request, Map<String, ID> emailTemplateNameToIdMap, Map<ID, ID> subjectIdToNetworkIdMap ) {
+
+        System.debug( 'processing request: ' + request );
+
+        String authorId = request.authorId;     // who is posting the message
+        String subjectId = request.subjectId;   // where the post is being made: user, group, record
+        String recordId = request.recordId;     // if using email template, the record used to satisfy merge fields
+        String message = request.message;       // if not using email template, the chatter message to post
+        String emailTemplateName = request.emailTemplateName;
+        String networkId = Network.getNetworkId();
 
         if ( String.isBlank( authorId ) ) {
             throw new ChatterBotPostMessageException( 'Missing "authorId" to indicate which user is authoring this Chatter post.' );
@@ -65,17 +92,19 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
         if ( String.isBlank( subjectId ) ) {
             throw new ChatterBotPostMessageException( 'Missing "subjectId" to indicate where to post this message: User, Group, or Record ID.' );
+        } else {
+            networkId = subjectIdToNetworkIdMap.get( subjectId );
         }
 
         if ( String.isNotBlank( emailTemplateName ) ) {
 
-            List<EmailTemplate> templates = new List<EmailTemplate>([ SELECT id, body FROM EmailTemplate WHERE developerName = :emailTemplateName LIMIT 1 ]);
+            ID emailTemplateId = emailTemplateNameToIdMap.get( emailTemplateName );
 
-            if ( templates.size() == 0 ) {
+            if ( String.isBlank( emailTemplateId ) ) {
                 throw new ChatterBotPostMessageException( 'No email template found by unique name: ' + emailTemplateName );
             }
 
-            Messaging.SingleEmailMessage emailMessage = Messaging.renderStoredEmailTemplate( templates[0].id, authorId, recordId );
+            Messaging.SingleEmailMessage emailMessage = Messaging.renderStoredEmailTemplate( emailTemplateId, authorId, recordId );
 
             message = emailMessage.getHtmlBody();
 
@@ -84,8 +113,6 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
         if ( String.isBlank( message ) ) {
             throw new ChatterBotPostMessageException( 'One of either "message" or "emailTemplateName" must be provided as the content of the Chatter post.' );
         }
-
-        String networkId = getNetworkIdForSubject( subjectId );
 
         postChatterMessage( networkId, authorId, subjectId, message );
 
@@ -136,49 +163,67 @@ public with sharing class ChatterBotPostMessageEmailHandler implements Messaging
 
     }
 
-    private ID getNetworkIdForSubject( String subjectId ) {
+    private Map<String, ID> queryEmailTemplateNameToIdMap( Set<String> emailTemplateNames ) {
 
-        System.debug( 'getting network id for subject id: ' + subjectId );
+        System.debug( 'building email template map' );
+        System.debug( 'emailTemplateNames=' + emailTemplateNames );
 
-        String networkId = null;
+        Map<String, ID> emailTemplateNameToIdMap = new Map<String, ID>();
+
+        if ( emailTemplateNames.size() > 0 ) {
+
+            List<EmailTemplate> templates = new List<EmailTemplate>([
+                SELECT
+                    id, developerName
+                FROM
+                    EmailTemplate
+                WHERE
+                    developerName IN :emailTemplateNames
+            ]);
+
+            for ( EmailTemplate template : templates ) {
+                emailTemplateNameToIdMap.put( template.developerName, template.id );
+            }
+
+        }
+
+        return emailTemplateNameToIdMap;
+    }
+
+    private Map<ID, ID> querySubjectIdToNetworkIdMap( Set<ID> subjectIds ) {
+
+        System.debug( 'building subject => network map' );
+        System.debug( 'subjectIds=' + subjectIds );
+
+        Map<ID, ID> subjectIdToNetworkIdMap = new Map<ID, ID>();
 
         DescribeSObjectResult groupDescribe = CollaborationGroup.sObjectType.getDescribe();
         Map<String, SObjectField> groupFieldsMap = groupDescribe.fields.getMap();
-
-        Boolean subjectIdIsGroup = ( groupDescribe.getKeyPrefix() == subjectId.left( 3 ) );
         Boolean groupHasNetworkId = ( groupFieldsMap.containsKey( 'NetworkId' ) );
 
-        System.debug( 'subjectIdIsGroup: ' + subjectIdIsGroup );
         System.debug( 'groupHasNetworkId: ' + groupHasNetworkId );
 
         // if posting to a group and the group belongs to a specific community then
         // we will use that as the network id. Note, the NetworkId field only exists
         // if an org has a community created.
-        if ( subjectIdIsGroup && groupHasNetworkId ) {
+        if ( groupHasNetworkId ) {
 
             // since an org may or may not have NetworkId field available
             // depending on if they have a community or not then we need
             // to use dynamic query to avoid compilation issues
-            for ( CollaborationGroup grp : Database.query( 'SELECT networkId FROM CollaborationGroup WHERE id = :subjectId LIMIT 1' ) ) {
+            for ( CollaborationGroup grp : Database.query( 'SELECT id, networkId FROM CollaborationGroup WHERE id IN :subjectIds' ) ) {
 
                 Object fieldValue = grp.get( 'networkId' );
 
                 if ( fieldValue != null ) {
-                    networkId = String.valueOf( fieldValue );
+                    subjectIdToNetworkIdMap.put( grp.id, String.valueOf( fieldValue ) );
                 }
 
             }
 
         }
 
-        if ( String.isBlank( networkId ) ) {
-            System.debug( 'Group does not have a NetworkId, using default Network.getNetWorkId()' );
-            networkId = Network.getNetworkId();
-        }
-
-        System.debug( 'networkId: ' + networkId );
-
-        return networkId;
+        return subjectIdToNetworkIdMap;
     }
 
     public class ChatterBotPostMessageException extends Exception {}

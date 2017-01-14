@@ -43,7 +43,7 @@ private class ChatterBotPostMessageInvocableTest {
 
             System.assert( false, 'Should fail' );
 
-        } catch ( ChatterBotPostMessageEmailBatchable.ChatterBotPostMessageException e ) {
+        } catch ( ChatterBotPostMessageInvocable.ChatterBotPostMessageException e ) {
 
             System.assert( e.getMessage().contains( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address__c' ) );
 

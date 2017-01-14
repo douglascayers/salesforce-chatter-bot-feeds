@@ -12,11 +12,34 @@ public with sharing class ChatterBotPostMessageInvocable {
 
         System.debug( 'ChatterBotPostMessageInvocable.execute: ' + requests );
 
-        Database.executeBatch( new ChatterBotPostMessageEmailBatchable( requests ), Limits.getLimitEmailInvocations() );
+        Chatter_Bot_Feeds_Setting__c settings = Chatter_Bot_Feeds_Setting__c.getInstance();
+
+        if ( String.isBlank( settings.email_service_address__c ) ) {
+            throw new ChatterBotPostMessageException( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address__c. Please update custom setting with email service address for ChatterBotPostMessageEmailHandler.' );
+        }
+
+        Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
+        message.setToAddresses( new String[] { settings.email_service_address__c } );
+        message.setPlainTextBody( JSON.serialize( requests ) );
+
+        List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
+        messages.add( message );
+
+        Boolean allOrNone = false;
+
+        List<Messaging.SendEmailResult> results = Messaging.sendEmail( messages, allOrNone );
+
+        for ( Messaging.SendEmailResult result : results ) {
+            if ( !result.isSuccess() ) {
+                for ( Messaging.SendEmailError err : result.getErrors() ) {
+                    System.debug( LoggingLevel.ERROR, err );
+                }
+            }
+        }
 
     }
 
-    // -----------------------------------------------
+    // -----------------------------------------------------------------
 
     public class Request {
 
@@ -53,5 +76,9 @@ public with sharing class ChatterBotPostMessageInvocable {
         public String recordId;
 
     }
+
+    // -----------------------------------------------------------------
+
+    public class ChatterBotPostMessageException extends Exception {}
 
 }
