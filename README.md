@@ -22,7 +22,7 @@ Installation & Getting Started
 
 1. Deploy [Chatter Bot for Groups](https://github.com/DouglasCAyers/salesforce-chatter-bot-groups#overview) and follow its **Getting Started** steps. *(the examples depend on this)*
 2. Deploy [Chatter Bot for Feeds](https://githubsfdeploy.herokuapp.com/).
-3. In Setup, create an **Email Service** using apex class `ChatterBotPostMessageEmailHandler` and an **Email Address**. Set the **Context User** to an **administrator** user.
+3. In Setup, create an **Email Service** using apex class `ChatterBotPostMessageEmailHandler` and an **Email Address**. Set the **Context User** to an **administrator** user. Take note of the generated email address as we will use it in a future step.
 4. Assign the **Chatter Bot Feeds Admin** permission set to the **Context User** to allow setting author for new Chatter posts.
 5. Create a [Chatter Free](https://help.salesforce.com/articleView?id=users_license_types_chatter.htm&type=0&language=en_US) user and set their **email address** to be the same as the Email Service Address from Step 3.
 6. Create a default organization default value for the **Chatter Bot Feeds Setting** custom setting and copy into the **Email Service Address User ID** field the ID of the Chatter Free user from Step 5.
