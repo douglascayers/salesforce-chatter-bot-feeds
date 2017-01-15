@@ -20,7 +20,8 @@ To learn more about my design decisions, please [read my blog post](https://doug
 Installation & Getting Started
 ------------------------------
 
-*Video tutorial coming soon!*
+*Video Tutorial*
+[![getting-started-video](/images/chatter-bot-getting-started-video.png)](https://www.youtube.com/watch?v=5Ls-S8DS8Vs "Video Tutorial")
 
 1. Follow the **Getting Started** steps and deploy [Chatter Bot for Groups](https://github.com/DouglasCAyers/salesforce-chatter-bot-groups#overview). *(the examples depend on this)*
 2. Deploy [Chatter Bot for Feeds](https://githubsfdeploy.herokuapp.com/).
