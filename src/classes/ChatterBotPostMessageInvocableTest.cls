@@ -9,7 +9,7 @@ private class ChatterBotPostMessageInvocableTest {
     static void test_success() {
 
         Chatter_Bot_Feeds_Setting__c settings = Chatter_Bot_Feeds_Setting__c.getInstance();
-        settings.email_service_address__c = 'test@salesforce.com';
+        settings.email_service_address_user_id__c = UserInfo.getUserId();
         upsert settings;
 
         Test.startTest();
@@ -45,7 +45,7 @@ private class ChatterBotPostMessageInvocableTest {
 
         } catch ( ChatterBotPostMessageInvocable.ChatterBotPostMessageException e ) {
 
-            System.assert( e.getMessage().contains( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address__c' ) );
+            System.assert( e.getMessage().contains( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address_User_ID__c' ) );
 
         }
 

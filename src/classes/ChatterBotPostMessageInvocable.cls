@@ -14,12 +14,14 @@ public with sharing class ChatterBotPostMessageInvocable {
 
         Chatter_Bot_Feeds_Setting__c settings = Chatter_Bot_Feeds_Setting__c.getInstance();
 
-        if ( String.isBlank( settings.email_service_address__c ) ) {
-            throw new ChatterBotPostMessageException( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address__c. Please update custom setting with email service address for ChatterBotPostMessageEmailHandler.' );
+        if ( String.isBlank( settings.email_service_address_user_id__c ) ) {
+            throw new ChatterBotPostMessageException( 'Missing Chatter_Bot_Feeds_Setting__c.Email_Service_Address_User_ID__c. Please update custom setting with email service address for ChatterBotPostMessageEmailHandler.' );
         }
 
         Messaging.SingleEmailMessage message = new Messaging.SingleEmailMessage();
-        message.setToAddresses( new String[] { settings.email_service_address__c } );
+        message.setTargetObjectId( settings.email_service_address_user_id__c );
+        message.setTreatTargetObjectAsRecipient( true );
+        message.setSaveAsActivity( false );
         message.setPlainTextBody( JSON.serialize( requests ) );
 
         List<Messaging.SingleEmailMessage> messages = new List<Messaging.SingleEmailMessage>();
@@ -59,13 +61,13 @@ public with sharing class ChatterBotPostMessageInvocable {
 
         @InvocableVariable(
             label = 'Chatter Message'
-            description = 'The message to post. One of "Chatter Message" or "Email Template Name" must be specified.'
+            description = 'The message to post. One of "Chatter Message" or "Email Template Unique Name" must be specified.'
         )
         public String message;
 
         @InvocableVariable(
             label = 'Email Template Unique Name'
-            description = 'An email template to use for generating the rich-text Chatter post message. One of "Chatter Message" or "Email Template Name" must be specified.'
+            description = 'An email template to use for generating the rich-text Chatter post message. One of "Chatter Message" or "Email Template Unique Name" must be specified.'
         )
         public String emailTemplateName;
 

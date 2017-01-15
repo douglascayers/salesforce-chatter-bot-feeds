@@ -4,11 +4,11 @@
     <description>Preferences for Chatter Bot Feeds</description>
     <enableFeeds>false</enableFeeds>
     <fields>
-        <fullName>Email_Service_Address__c</fullName>
-        <description>The Email Service Address of an Apex Email Service that uses ChatterBotPostMessageEmailHandler. The Context User must have the system permission &quot;Insert System Field Values for Chatter Feeds&quot; to post as arbitrary users.</description>
+        <fullName>Email_Service_Address_User_ID__c</fullName>
+        <description>To avoid consuming daily org-wide email limits, create a Chatter Free user whose email is the Email Service Address of the Apex Email Service that uses ChatterBotPostMessageEmailHandler. The Context User of that service (not the Chatter Free user) must have the system permission &quot;Insert System Field Values for Chatter Feeds&quot; to post as arbitrary users. https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_email.htm</description>
         <externalId>false</externalId>
-        <inlineHelpText>The Email Service Address of an Apex Email Service that uses ChatterBotPostMessageEmailHandler. The Context User must have the system permission &quot;Insert System Field Values for Chatter Feeds&quot; to post as arbitrary users.</inlineHelpText>
-        <label>Email Service Address</label>
+        <inlineHelpText>To avoid consuming daily org-wide email limits, create a Chatter Free user whose email is the Email Service Address of the Apex Email Service that uses ChatterBotPostMessageEmailHandler.</inlineHelpText>
+        <label>Email Service Address User ID</label>
         <length>255</length>
         <required>false</required>
         <trackTrending>false</trackTrending>
