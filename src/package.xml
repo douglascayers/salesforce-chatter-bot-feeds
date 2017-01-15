@@ -16,6 +16,7 @@
         <name>CustomObject</name>
     </types>
     <types>
+        <members>Chatter_Bot_Email_Templates</members>
         <members>Chatter_Bot_Email_Templates/Chatter_Bot_Post_Message_Template</members>
         <name>EmailTemplate</name>
     </types>
