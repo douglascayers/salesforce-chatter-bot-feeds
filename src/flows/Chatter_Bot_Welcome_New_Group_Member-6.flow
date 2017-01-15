@@ -214,7 +214,31 @@
             <name>myRule_1</name>
             <conditionLogic>and</conditionLogic>
             <conditions>
-                <leftValueReference>formula_myRule_1</leftValueReference>
+                <processMetadataValues>
+                    <name>inputDataType</name>
+                    <value>
+                        <stringValue>Boolean</stringValue>
+                    </value>
+                </processMetadataValues>
+                <processMetadataValues>
+                    <name>leftHandSideType</name>
+                    <value>
+                        <stringValue>Boolean</stringValue>
+                    </value>
+                </processMetadataValues>
+                <processMetadataValues>
+                    <name>operatorDataType</name>
+                    <value>
+                        <stringValue>Boolean</stringValue>
+                    </value>
+                </processMetadataValues>
+                <processMetadataValues>
+                    <name>rightHandSideType</name>
+                    <value>
+                        <stringValue>Boolean</stringValue>
+                    </value>
+                </processMetadataValues>
+                <leftValueReference>myVariable_current.Is_Member__c</leftValueReference>
                 <operator>EqualTo</operator>
                 <rightValue>
                     <booleanValue>true</booleanValue>
@@ -223,7 +247,7 @@
             <connector>
                 <targetReference>myRule_1_A1</targetReference>
             </connector>
-            <label>Always</label>
+            <label>Joins Group</label>
         </rules>
     </decisions>
     <description>Example that welcomes new chatter group members</description>
@@ -238,12 +262,7 @@
         <dataType>String</dataType>
         <expression>$User.Id</expression>
     </formulas>
-    <formulas>
-        <name>formula_myRule_1</name>
-        <dataType>Boolean</dataType>
-        <expression>true</expression>
-    </formulas>
-    <interviewLabel>Chatter_Bot_Welcome_New_Group_Member-5_Chatter_Bot_Group_Member__c</interviewLabel>
+    <interviewLabel>Chatter_Bot_Welcome_New_Group_Member-6_Chatter_Bot_Group_Member__c</interviewLabel>
     <label>Chatter Bot - Welcome New Group Member</label>
     <processMetadataValues>
         <name>ObjectType</name>
