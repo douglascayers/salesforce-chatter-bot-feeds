@@ -12,7 +12,7 @@ Although there are many ways to post Chatter messages in Salesforce using Proces
 3. Must support rich-text
 4. Must support @ mentions
 
-To learn more about my design decisions, please [read my blog post]() introducing Chatter Bot for Feeds.
+To learn more about my design decisions, please [read my blog post](https://douglascayers.com) introducing Chatter Bot for Feeds.
 
 
 Installation & Getting Started
@@ -54,7 +54,7 @@ The Email Service is only so that we can get code to execute as an administrator
 2. You want to post a rich-text message
 3. You want to @ mention users or groups
 
-To learn more about my design decisions, please [read my blog post]() introducing Chatter Bot for Feeds.
+To learn more about my design decisions, please [read my blog post](https://douglascayers.com) introducing Chatter Bot for Feeds.
 
 
 Why is a Chatter Free user necessary for the Email Service?
