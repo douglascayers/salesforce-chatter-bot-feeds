@@ -1,6 +1,8 @@
 Salesforce Chatter Bot for Feeds
 ================================
 
+![image](/images/chatter-bot-post-message.png)
+
 Overview
 --------
 
@@ -34,6 +36,7 @@ Next Steps
 
 Now that you have all the configuration in place, now it's time to focus on your actual use cases for automating Chatter posts and deciding **who** you want the author to be in each of those scenarios.
 
+
 Email Templates: Fancy Messages
 -------------------------------
 
@@ -46,6 +49,16 @@ Process Builder
 ---------------
 
 Refer to the example process named **Chatter Bot - Welcome New Group Member**. There is one Immediate Action that demonstrates how to invoke the **CB: Post Message** Apex method. By default, the **Author User ID** is set the `$User.Id`, the current user who causes the process to fire. For your purposes, you will want to change that to your desired Chatter post author such as a community manager, the CEO, a comical Chatter Free user, whatever.
+
+![image](/images/chatter-bot-post-message-process-builder.png)
+
+
+Responsibility
+==============
+
+As the [#AwesomeAdmin](https://twitter.com/hashtag/awesomeadmin) that you are, you understand that with [great power comes great responsibility](http://www.slideshare.net/Salesforce/appexchange-super-hero-3). Impersonate other users on Chatter with care and always have consent from the intended author before automating posts by them. Thanks!
+
+![image](/images/impersonate-user-with-care-superpower.png)
 
 
 FAQ
