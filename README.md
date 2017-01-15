@@ -20,12 +20,32 @@ Installation & Getting Started
 
 *Video tutorial coming soon!*
 
-1. Deploy [Chatter Bot for Groups](https://github.com/DouglasCAyers/salesforce-chatter-bot-groups#overview) and follow its **Getting Started** steps. *(the examples depend on this)*
+1. Follow the **Getting Started** steps and deploy [Chatter Bot for Groups](https://github.com/DouglasCAyers/salesforce-chatter-bot-groups#overview). *(the examples depend on this)*
 2. Deploy [Chatter Bot for Feeds](https://githubsfdeploy.herokuapp.com/).
-3. In Setup, create an **Email Service** using apex class `ChatterBotPostMessageEmailHandler` and an **Email Address**. Set the **Context User** to an **administrator** user. Take note of the generated email address as we will use it in a future step.
+3. In Setup, create an **Email Service** using apex class `ChatterBotPostMessageEmailHandler` then create an **Email Address**. Set the **Context User** for the email service address to an **administrator** user. Take note of the generated email address as we will use it in a future step.
 4. Assign the **Chatter Bot Feeds Admin** permission set to the **Context User** you chose. This allows setting the author for new Chatter posts to someone other than the current user.
 5. Create a [Chatter Free](https://help.salesforce.com/articleView?id=users_license_types_chatter.htm&type=0&language=en_US) user and set their **email address** to be the same as the Email Service Address from Step 3.
 6. Create a default organization default value for the **Chatter Bot Feeds Setting** custom setting and copy into the **Email Service Address User ID** field the ID of the Chatter Free user from Step 5.
+7. To test, add yourself or another user to a Chatter Group monitored by **Chatter Bot for Groups** (see Step 1). Within a couple seconds you should be able to refresh that group's feed and see the welcome post. Congratulations!
+
+
+Next Steps
+==========
+
+Now that you have all the configuration in place, now it's time to focus on your actual use cases for automating Chatter posts and deciding **who** you want the author to be in each of those scenarios.
+
+Email Templates: Fancy Messages
+-------------------------------
+
+Refer to the **Chatter Bot Post Message Template** email template for examples of supported rich-text in Chatter posts and the syntax for @ mentions. Your messages can also include merge fields from a record identified by the variable **Record ID (Template Merge Fields)** when invoking the **CB: Post Message** Apex method in Process Builder.
+
+Alternatively, rather than specify values for `Email Template Unique Name` and `Record ID( Template Merge Fields` variables, you can use the `Message` variable to specify your Chatter message right within Process Builder. Sometimes that is an easy option for simple messages.
+
+
+Process Builder
+---------------
+
+Refer to the example process named **Chatter Bot - Welcome New Group Member**. There is one Immediate Action that demonstrates how to invoke the **CB: Post Message** Apex method. By default, the **Author User ID** is set the `$User.Id`, the current user who causes the process to fire. For your purposes, you will want to change that to your desired Chatter post author such as a community manager, the CEO, a comical Chatter Free user, whatever.
 
 
 FAQ
