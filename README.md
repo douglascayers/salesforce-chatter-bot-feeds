@@ -35,7 +35,7 @@ Why do I get error "The object named Chatter_Bot_Group_Member__c can't be found.
 ----------------------------------------------------------------------------------------------------
 
 The example Process Builder included in **Chatter Bot for Feeds** is designed for the use case when users join a group. That capability is only provided through **Chatter Bot for Groups**.
-See also question [Can Chatter Bot for Feeds be used without Chatter Bot for Groups?]().
+See also question [Can Chatter Bot for Feeds be used without Chatter Bot for Groups?](#can-chatter-bot-for-feeds-be-used-without-chatter-bot-for-groups).
 
 
 Can Chatter Bot for Feeds be used without Chatter Bot for Groups?
