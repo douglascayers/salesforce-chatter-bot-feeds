@@ -96,3 +96,9 @@ Why is a Chatter Free user necessary for the Email Service?
 
 Not for any technical reason to get this solution to work but rather to avoid using up any of your [org's daily email quota](https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_email.htm).
 Apex can send a certain number of emails to external addresses each day, but an unlimited number of emails can be sent to internal users. Using a Chatter Free user for this purpose is a free and easy way around the Apex limitation.
+
+
+Where will the Chatter post be made to?
+---------------------------------------
+
+You can specify a User ID, Chatter Group ID, or record ID where you would like the Chatter post to be made. If you specify a FeedItem ID (a Chatter post ID) then a [FeedComment](https://developer.salesforce.com/docs/atlas.en-us.api.meta/api/sforce_api_objects_feedcomment.htm) will be created for that Chatter conversation instead of a whole new Chatter post.
