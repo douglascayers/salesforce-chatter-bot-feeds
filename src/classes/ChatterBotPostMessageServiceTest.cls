@@ -83,6 +83,34 @@ private class ChatterBotPostMessageServiceTest {
 
     }
 
+    @IsTest( seeAllData = true )
+    static void test_post_comment() {
+
+        FeedItem fi = new FeedItem(
+            parentId = UserInfo.getUserId(),
+            body = 'Chatter Post'
+        );
+
+        insert fi;
+
+        ChatterBotPostMessageInvocable.Request req = new ChatterBotPostMessageInvocable.Request();
+        req.authorId = UserInfo.getUserId();
+        req.subjectId = fi.id;
+        req.recordId = UserInfo.getUserId();
+        req.emailTemplateName = 'Chatter_Bot_Post_Message_Template';
+
+        Test.startTest();
+
+        new ChatterBotPostMessageService().processRequests( new List<ChatterBotPostMessageInvocable.Request>{ req } );
+
+        Test.stopTest();
+
+        FeedComment comment = [ SELECT id FROM FeedComment WHERE feedItemId = :fi.id LIMIT 1 ];
+
+        System.debug( comment );
+
+    }
+
     @isTest( seeAllData = true )
     static void test_missing_authorId() {
 

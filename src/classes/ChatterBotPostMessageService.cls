@@ -4,6 +4,8 @@
  */
 public with sharing class ChatterBotPostMessageService {
 
+    private static final String FEED_ITEM_KEY_PREFIX = FeedItem.sObjectType.getDescribe().getKeyPrefix();
+
     public void processRequests( List<ChatterBotPostMessageInvocable.Request> requests ) {
 
         System.debug( 'processing requests' );
@@ -77,9 +79,46 @@ public with sharing class ChatterBotPostMessageService {
 
     }
 
+    /**
+     * Determines if we should post a FeedItem or FeedComment based on the subject id.
+     * If the subject is itself a Chatter FeedItem then we will post a comment to that thread.
+     * Otherwise we post a new Chatter message.
+     */
     private void postChatterMessage( ID networkId, ID authorId, ID subjectId, String message ) {
 
         System.debug( 'posting chatter message: networkId=' + networkId + ', authorId=' + authorId + ', subjectId=' + subjectId + ', message=' + message );
+
+        // if message uses Flow or Process Builder @mention syntax @[user_or_group_id]
+        // unfortunately the ConnectApi doesn't support that. It won't error, but won't
+        // resolve to an expected @mention. So we need to translate that syntax into
+        // the syntax expected by ConnectApi, which is simply {user_or_group_id}.
+        // Now, you might say, well, tell folks to use that new syntax instead.
+        // Unfortunately, if you try to use that {id} syntax in a Flow Text Template
+        // then it misinterprets and tries to pre-emptively resolve the variable and
+        // results in {Notfound} rendered. Not what we want....
+        Matcher mentionMatcher = Pattern.compile( '(@\\[([a-zA-Z0-9]+)\\])' ).matcher( message );
+        while ( mentionMatcher.find() ) {
+            message = mentionMatcher.replaceAll( '{$2}' );
+        }
+
+        String subjectKeyPrefix = String.valueOf( subjectId ).left( 3 );
+
+        if ( subjectKeyPrefix == FEED_ITEM_KEY_PREFIX ) {
+            postFeedComment( networkId, authorId, subjectId, message );
+        } else {
+            postFeedItem( networkId, authorId, subjectId, message );
+        }
+
+    }
+
+    /**
+     * Posts a new message related to given subject.
+     * SubjectId must not be another FeedItem or FeedComment but rather
+     * a User ID, Chatter Group ID, or other record ID like an Account, Contact, etc.
+     */
+    private void postFeedItem( ID networkId, ID authorId, ID subjectId, String message ) {
+
+        System.debug( 'posting feed item: networkId=' + networkId + ', authorId=' + authorId + ', subjectId=' + subjectId + ', message=' + message );
 
         // we use a mix of FeedItem DML and ConnectApi for our requirements:
         // 1. Post Chatter Message as any user (FeedItem DML)
@@ -119,6 +158,55 @@ public with sharing class ChatterBotPostMessageService {
         fe = ConnectApi.ChatterFeeds.updateFeedElement( networkId, fe.id, input );
 
         System.debug( fe );
+
+    }
+
+    /**
+     * Posts a comment to an existing feed item.
+     * SubjectId must be ID of a FeedItem record.
+     */
+    private void postFeedComment( ID networkId, ID authorId, ID subjectId, String message ) {
+
+        System.debug( 'posting feed comment: networkId=' + networkId + ', authorId=' + authorId + ', subjectId=' + subjectId + ', message=' + message );
+
+        // we use a mix of FeedComment DML and ConnectApi for our requirements:
+        // 1. Post Chatter Message as any user (FeedComment DML)
+        // 2. Post Rich-Text content with @mentions (ConnectApi)
+
+        // setting the createdById only works if the context user of this email service
+        // has the system permission "Insert System Field Values for Chatter Feeds"
+
+        // even though rich-text is supported with FeedComment DML,
+        // all @mention links are converted to plain text.
+        // workaround is that after inserting the FeedComment we use ConnectApi
+        // to update the element with the same rich-text but @mentions will be preserved.
+
+        FeedComment fc = new FeedComment(
+            feedItemId = subjectId,     // where post is being made: user, group, record
+            createdById = authorId,     // who is posting the message
+            commentBody = message,      // rich-text, but @mentions not supported
+            isRichText = true           // we support rich-text and @mentions
+        );
+
+        insert fc;
+
+        System.debug( fc );
+
+        // after creating the shell of the feed comment, retrieve the record back in Chatter for Apex
+        ConnectApi.Comment comment = ConnectApi.ChatterFeeds.getComment( networkId, fc.id );
+
+        // parse the rich-text message and create new message input
+        ConnectApi.MessageBodyInput messageInput = new ConnectApi.MessageBodyInput();
+        messageInput.messageSegments = ConnectApiHelper.getMessageSegmentInputs( message );
+
+        // define an updated feed element using the rich-text message
+        ConnectApi.CommentInput input = new ConnectApi.CommentInput();
+        input.body = messageInput;
+
+        // replace the content of the chatter post
+        comment = ConnectApi.ChatterFeeds.updateComment( networkId, comment.id, input );
+
+        System.debug( comment );
 
     }
 
