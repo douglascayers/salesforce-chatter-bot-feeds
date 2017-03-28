@@ -2,7 +2,7 @@
  * Developed by Doug Ayers (douglascayers.com)
  * https://github.com/DouglasCAyers/salesforce-chatter-bot-feeds
  */
-public with sharing class ChatterBotPostMessageService {
+public without sharing class ChatterBotPostMessageService {
 
     private static final String FEED_ITEM_KEY_PREFIX = FeedItem.sObjectType.getDescribe().getKeyPrefix();
 
