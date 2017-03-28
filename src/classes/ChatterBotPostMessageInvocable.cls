@@ -2,7 +2,7 @@
  * Developed by Doug Ayers (douglascayers.com)
  * https://github.com/DouglasCAyers/salesforce-chatter-bot-feeds
  */
-public with sharing class ChatterBotPostMessageInvocable {
+public without sharing class ChatterBotPostMessageInvocable {
 
     @InvocableMethod(
         label = 'CB: Post Message'
