@@ -136,7 +136,8 @@ public without sharing class ChatterBotPostMessageService {
             parentId = subjectId,       // where post is being made: user, group, record
             createdById = authorId,     // who is posting the message
             body = message,             // rich-text, but @mentions not supported
-            isRichText = true           // we support rich-text and @mentions
+            isRichText = true,           // we support rich-text and @mentions
+            networkScope = networkId      // for external community chatter groups to work
         );
 
         insert fi;
